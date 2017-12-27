@@ -1,0 +1,139 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>常用</h2>
+        <label class="control-label">日期</label>
+        <input type="text" class="form-control" id="datefomrat" />
+        <label class="control-label">信用卡卡號</label>
+        <input type="text" class="form-control" id="creditcardformat" />
+        <input type="text" class="form-control" style="margin-top:5px;" id="creditcardno" placeholder="原始輸入值" readonly />
+        <label class="control-label">電話</label>
+        <input type="text" class="form-control" id="phonenoformat" />
+        <label class="control-label">手機號碼</label>
+        <input type="text" class="form-control" id="cellphoneformat" />
+        <label class="control-label">身分證字號</label>
+        <input type="text" class="form-control" id="idnoformat" />
+        <label class="control-label">登入帳號</label>
+        <input type="text" class="form-control" id="accountformat" />
+        <p>
+            預設設定：
+            0: 數字
+            A: 數字或英文
+            S: 英文
+        </p>
+    </div>
+    <div class="col-md-4">
+        <h2>客製化</h2>
+        <label class="control-label">自訂條件1(輸入限制)</label>
+        <input type="text" class="form-control" id="cusample1" />
+        <label class="control-label">自訂條件2(小數點)</label>
+        <input type="text" class="form-control" id="cusample2" />
+        <label class="control-label">自訂條件3(反向)</label>
+        <input type="text" class="form-control" id="cusample3" />
+        <label class="control-label">自訂條件4(允許特殊符號)</label>
+        <input type="text" class="form-control" id="cusample4" />
+    </div>
+    <div class="col-md-4">
+        <h2>CallBack function</h2>
+        <label class="control-label">onComplete</label>
+        <input type="text" class="form-control" id="callback01" />
+        <label class="control-label">onKeyPress</label>
+        <input type="text" class="form-control" id="callback02" />
+        <label class="control-label">onChange</label>
+        <input type="text" class="form-control" id="callback03" />
+        <label class="control-label">onInvalid</label>
+        <input type="text" class="form-control" id="callback04" />
+        <label class="control-label">動態綁定mask</label>
+        <input type="text" class="form-control" id="callback05" />
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        $(document).ready(function () {
+            /*預設*/
+            $('#datefomrat').mask('0000/00/00');
+            $('#creditcardformat').mask('0000-0000-0000-0000');
+            $('#phonenoformat').mask('(00)0000-0000');
+            $('#cellphoneformat').mask('0000-000-000');
+            $('#idnoformat').mask('S000000000');
+            $('#accountformat').mask('AAAAAAAA');
+
+            $('#creditcardformat').change(function () {
+                const oriValue = $(this).cleanVal();
+                $('#creditcardno').val(oriValue);
+            })
+
+            /*客製化*/
+            $('#cusample1').mask('BBB-777', {
+                'translation': {
+                    B: { pattern: /[A-Z]/ },
+                    7: { pattern: /[1-7]/ }
+                }
+            });
+            $('#cusample2').mask('0Z.ZZ', {
+                translation: {
+                    Z: { pattern: /[0-9]/, optional: true }
+                }
+            });
+            $('#cusample3').mask('0,000,000', { reverse: true })
+            $('#cusample4').mask('KKKKKKKKKK', {
+                'translation': {
+                    K: { pattern: /[A-Za-z*&.]/ }
+                }
+            })
+
+            /*CallBack*/
+            $('#callback01').mask('0000-0000', {
+                onComplete: function (cep) {
+                    alert('您輸入的電話號碼為' + cep);
+                }
+            })
+
+            $('#callback02').mask('0000-0000', {
+                onKeyPress: function (cep, event, currentField, options) {
+                    alert('您輸入的數字為' + cep);
+                    //console.log(' event: ', event, 'currentField: ', currentField, ' options: ', options);
+                }
+            })
+            $('#callback03').mask('0000-0000', {
+                onChange: function (cep) {
+                    alert('您輸入的號碼變更為' + cep);
+                }
+            })
+            $('#callback04').mask('0000-0000', {
+                onInvalid: function (val, e, f, invalid, options) {
+                    var error = invalid[0];
+                    alert("您在第" + error.p + "位元後所輸入的" + error.v + "為非法字元");
+                    //console.log("Digit: ", error.v, " is invalid for the position: ", error.p, ". We expect something like: ", error.e);
+                }
+            })
+            let option = {
+                onKeyPress: function (cep, event, currentField, options) {
+                    var masks = ['(00)0000-0000', '0000-000000'];
+                    let mask;
+                    if (typeof (cep) != 'undefined') {
+                        if (cep.length >= 3) {
+                            let test1 = cep.substring(1, 3);
+                            let test2 = cep.substring(0, 2);
+                            if (test1 === '09' || test2 === '09') {
+                                mask = masks[1];
+                            }
+                            else {
+                                mask = masks[0]
+                            }
+                        }
+                    }
+                    else {
+                        return;
+                    }
+                    $('#callback05').mask(mask, option);
+                }
+            };
+            $('#callback05').mask('(00)0000-0000', option);
+        })
+    </script>
+}
